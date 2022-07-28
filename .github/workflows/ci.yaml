@@ -31,6 +31,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ steps.docker_meta.outputs.tags }}
-            ${{ github.ref == 'refs/heads/main' && 'biggates/pandoc-plantuml-mermaid:latest' || '' }}
+            ${{ github.ref == 'refs/heads/master' && 'biggates/pandoc-plantuml-mermaid:latest' || '' }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
