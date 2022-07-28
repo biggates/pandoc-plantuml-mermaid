@@ -2,7 +2,7 @@
 
 [![GitHub Workflow badge](https://img.shields.io/github/workflow/status/biggates/pandoc-plantuml-mermaid/ci?label=GitHub%20building&logo=github)](https://github.com/biggates/pandoc-plantuml-mermaid) [![docker badge](https://img.shields.io/docker/pulls/biggates/pandoc-plantuml-mermaid?logo=docker)](https://hub.docker.com/r/biggates/pandoc-plantuml-mermaid)
 
-一个带有 plantuml 和 mermaid 支持的镜像。
+一个带有 plantuml 和 mermaid 支持，并带有 LaTeX 环境的 docker 镜像。
 
 ## 如何使用
 
@@ -24,15 +24,53 @@ $ docker run --rm -v `pwd`:/var/docs biggates/pandoc-plantuml-mermaid
 
 ### 已知问题
 
-* 首次运行时，mermaid 图表无法生成，报 `Error in $: Failed reading: not a valid json value at 'Generatingsinglemermaidchart'` 错。
+* mermaid 图表无法生成，报 `Error in $: Failed reading: not a valid json value at 'Generatingsinglemermaidchart'` 错。
 
-  > 使用相同的参数重新运行一次就可以了。
+  > 使用相同的参数重新运行一次，一般情况下就可以解决了。
+  > 如果仍然不行，要检查一下 mermaid 语法是否有错。
 
 * 重复报 `Could not create directory "mermaid-images"`
 
   > 如果 pandoc 输出的文件没有问题，就可以忽略。
 
+### 示例
+
+假设当前目录中的文件为:
+
+```
+example.md
+template.tex
+```
+
+使用如下方法将 example.md 转换为 pdf:
+
+```bash
+$ docker run --rm -v `pwd`:/var/docs biggates/pandoc-plantuml-mermaid \
+  example.md \
+  --standalone \
+  --number-sections \
+  --output example.pdf \
+  --toc \
+  --include-in-header /var/docs/template.tex \
+  --pdf-engine=xelatex \
+  -VCJKmainfont="Noto Serif CJK SC"
+```
+
 ## 参与开发
+
+### 主要组件
+
+本 image 中的主要组件为:
+
+* 基于 `texlive/texlive`
+* nodejs
+  * mermaid-cli 位于 `/usr/local/lib/node_modules/.bin/mmdc` -> `/usr/bin/mermaid`
+* python3
+* plantuml 位于 `/home/plantuml.jar`
+  * graphviz
+  * inkspace
+  * gnuplot
+* fonts-noto-cjk
 
 ### 编译 docker 镜像
 
