@@ -8,16 +8,15 @@ RUN wget https://github.com/plantuml/plantuml/releases/download/v1.2022.6/plantu
 
 # download pandoc
 FROM alpine as download-pandoc
-RUN wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb -O /tmp/pandoc.deb
+RUN wget https://github.com/jgm/pandoc/releases/download/2.19/pandoc-2.19-1-amd64.deb -O /tmp/pandoc.deb
 
 # make mermaid
-FROM node:17-bullseye-slim as build-env-node
+FROM node:18-bullseye-slim as build-env-node
 RUN yarn add @mermaid-js/mermaid-cli
 
 #
 # Run stage
 #
-# FROM danteev/texlive as setup-env
 FROM texlive/texlive as setup-env
 
 RUN export DEBIAN_FRONTEND=noninteractive \
@@ -30,6 +29,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
   graphviz \
   inkscape \
   gnuplot \
+  librsvg2-bin \
   # Noto font families with large Unicode coverage
   fonts-noto-cjk \
   fonts-noto-cjk-extra \
@@ -55,7 +55,11 @@ WORKDIR /tmp
 COPY --from=download-pandoc /tmp/pandoc.deb /tmp/pandoc.deb
 RUN dpkg -i pandoc.deb && rm pandoc.deb
 
-RUN python -m pip install pandoc-plantuml-filter git+https://github.com/timofurrer/pandoc-mermaid-filter.git
+# python packages
+RUN python -m pip install \
+  pandoc-plantuml-filter \
+  git+https://github.com/timofurrer/pandoc-mermaid-filter.git \
+  git+https://gitlab.com/myriacore/pandoc-kroki-filter.git
 
 COPY --from=download-plantuml /tmp/plantuml.jar /home/plantuml.jar
 
@@ -75,6 +79,8 @@ ENV PUPPETEER_CFG=/opt/puppeteer/puppeteer.json
 # Could not create directory xxx, 但即使设置了也没用
 # ENV PANDOCFILTER_CLEANUP="1"
 
+ENV KROKI_DIAGRAM_BLACKLIST="plantuml,mermaid"
+
 RUN useradd pandoc
 
 RUN mkdir /var/docs && chown pandoc /var/docs
@@ -85,4 +91,4 @@ USER pandoc
 
 WORKDIR /var/docs/
 
-ENTRYPOINT ["pandoc", "--filter", "pandoc-plantuml", "--filter", "pandoc-mermaid"]
+ENTRYPOINT ["pandoc", "--filter", "pandoc-plantuml", "--filter", "pandoc-mermaid", "--filter", "pandoc-kroki"]

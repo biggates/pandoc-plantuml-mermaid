@@ -22,6 +22,13 @@ $ docker run --rm -v `pwd`:/var/docs biggates/pandoc-plantuml-mermaid
 
 在工作中会创建 `/var/docs/mermaid-images/` 目录和 `/var/docs/plantuml-images` 目录。
 
+### 配置项
+
+| 环境变量                  | 默认值              | 使用者              | 说明                    |
+| ------------------------- | ------------------- | ------------------- | ----------------------- |
+| `KROKI_SERVER`            | `https://kroki.io/` | pandoc-kroki-filter | Kroki 服务器的地址      |
+| `KROKI_DIAGRAM_BLACKLIST` | `mermaid,plantuml`  | pandoc-kroki-filter | 不使用 kroki 绘图的类型 |
+
 ### 已知问题
 
 * mermaid 图表无法生成，报 `Error in $: Failed reading: not a valid json value at 'Generatingsinglemermaidchart'` 错。
@@ -45,15 +52,16 @@ template.tex
 使用如下方法将 example.md 转换为 pdf:
 
 ```bash
-$ docker run --rm -v `pwd`:/var/docs biggates/pandoc-plantuml-mermaid \
-  example.md \
+$ docker run --rm \
+  -v `pwd`:/var/docs biggates/pandoc-plantuml-mermaid \
   --standalone \
   --number-sections \
   --output example.pdf \
   --toc \
   --include-in-header /var/docs/template.tex \
   --pdf-engine=xelatex \
-  -VCJKmainfont="Noto Serif CJK SC"
+  -VCJKmainfont="Noto Serif CJK SC" \
+  example.md
 ```
 
 ## 参与开发
@@ -66,11 +74,17 @@ $ docker run --rm -v `pwd`:/var/docs biggates/pandoc-plantuml-mermaid \
 * nodejs
   * mermaid-cli 位于 `/usr/local/lib/node_modules/.bin/mmdc` -> `/usr/bin/mermaid`
 * python3
+  * [pandoc-mermaid-filter](https://github.com/timofurrer/pandoc-mermaid-filter)
+  * [pandoc-plantuml-filter](https://github.com/timofurrer/pandoc-plantuml-filter)
+  * [pandoc-kroki-filter](https://gitlab.com/myriacore/pandoc-kroki-filter)
 * plantuml 位于 `/home/plantuml.jar`
   * graphviz
   * inkspace
   * gnuplot
-* fonts-noto-cjk
+* fonts
+  * fonts-noto-cjk
+  * fonts-noto-cjk-extra
+  * fonts-noto-mono
 
 ### 编译 docker 镜像
 
