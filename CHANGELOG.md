@@ -12,8 +12,8 @@
 * pandoc-plantuml-filter `0.1.2`
 * pandocfilters `1.5.0`
 * rsvg-convert `2.54.4`
-* XeLaTeX `3.141592653-2.6-0.999993 (TeX Live 2021)`
-* pdfTex `3.141592653-2.6-1.40.23 (TeX Live 2021)`
+* XeLaTeX `3.141592653-2.6-0.999994 (TeX Live 2022)`
+* pdfTex `3.141592653-2.6-1.40.24 (TeX Live 2022)`
 
 ## 20220728
 
@@ -34,6 +34,7 @@
 $ docker run --rm -it --entrypoint /bin/bash biggates/pandoc-plantuml-mermaid:latest
 
 $ pandoc --version
+$ plantuml -version
 $ mermaid --version
 $ node -v
 $ python --version
