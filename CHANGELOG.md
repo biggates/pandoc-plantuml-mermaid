@@ -30,15 +30,10 @@
 
 ## 如何生成
 
-```bash
-$ docker run --rm -it --entrypoint /bin/bash biggates/pandoc-plantuml-mermaid:latest
+```bash title=linux host
+docker run --rm --entrypoint /usr/bin/python3 -v `pwd`/scripts:/tmp/scripts biggates/pandoc-plantuml-mermaid:latest /tmp/scripts/list_versions.py
+```
 
-$ pandoc --version
-$ plantuml -version
-$ mermaid --version
-$ node -v
-$ python --version
-$ python -m pip list -v
-$ xelatex --version
-$ rsvg-convert --version
+```bash title=windows host
+docker run --rm --entrypoint /usr/bin/python3 -v %cd%/scripts:/tmp/scripts biggates/pandoc-plantuml-mermaid:latest /tmp/scripts/list_versions.py
 ```

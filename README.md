@@ -89,7 +89,7 @@ $ docker run --rm \
 ### 编译 docker 镜像
 
 ```bash
-$ docker build -t biggates/pandoc-plantuml-mermaid:latest .
+docker build -t biggates/pandoc-plantuml-mermaid:latest .
 ```
 
 ### 调用 bash
@@ -97,5 +97,5 @@ $ docker build -t biggates/pandoc-plantuml-mermaid:latest .
 使用如下方法可以启动容器内部的 bash
 
 ```bash
-$ docker run --rm -it --entrypoint /bin/bash biggates/pandoc-plantuml-mermaid:latest
+docker run --rm -it --entrypoint /bin/bash biggates/pandoc-plantuml-mermaid:latest
 ```
