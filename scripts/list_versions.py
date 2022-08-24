@@ -6,17 +6,19 @@ import subprocess
 
 
 def _run(*args, regex: str = None) -> str:
-    p = subprocess.run(args, capture_output=True, text=True)
+    try:
+        p = subprocess.run(args, capture_output=True, text=True)
 
-    if regex is None:
-        return p.stdout.strip()
-    else:
-        lines = p.stdout.splitlines()
-        for line in lines:
-            m = re.match(regex, line)
-            if m:
-                return m.group(1).strip()
-
+        if regex is None:
+            return p.stdout.strip()
+        else:
+            lines = p.stdout.splitlines()
+            for line in lines:
+                m = re.match(regex, line)
+                if m:
+                    return m.group(1).strip()
+    except:
+        pass
     return None
 
 
@@ -60,7 +62,7 @@ def _version_pdftex() -> str:
 
 
 def _version_rsvg_convert() -> str:
-    return _run("rsvg-convert", "--version", regex="version (.+)$")
+    return _run("rsvg-convert", "--version", regex=r"^rsvg\-convert version (.+)$")
 
 
 if __name__ == "__main__":

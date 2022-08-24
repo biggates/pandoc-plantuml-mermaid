@@ -2,52 +2,35 @@
 # Build stage
 #
 
-# download latest plantuml.jar
-FROM alpine as download-plantuml
-RUN wget https://github.com/plantuml/plantuml/releases/download/v1.2022.6/plantuml-1.2022.6.jar -O /tmp/plantuml.jar
-
 # download pandoc
 FROM alpine as download-pandoc
-RUN wget https://github.com/jgm/pandoc/releases/download/2.19/pandoc-2.19-1-amd64.deb -O /tmp/pandoc.deb
+RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb -O /tmp/pandoc.deb
 
-# make mermaid
-FROM node:18-bullseye-slim as build-env-node
-RUN yarn add @mermaid-js/mermaid-cli
+# clone eisvogel template
+FROM alpine as download-eisvogel
+WORKDIR /tmp
+RUN wget https://github.com/Wandmalfarbe/pandoc-latex-template/releases/download/v2.0.0/Eisvogel-2.0.0.tar.gz -O /tmp/eisvogel.tar.gz
+RUN tar zxf eisvogel.tar.gz
 
 #
 # Run stage
 #
 FROM texlive/texlive as setup-env
 
+# debian 软件源, 仅在调试时打开
+# RUN sed -i -E 's/(deb|security).debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list
+
 RUN export DEBIAN_FRONTEND=noninteractive \
   && apt-get update \
   && apt-get install -y -q --fix-missing \
-  nodejs \
   git \
-  python3 \
+  # python3 \
   python3-pip \
-  graphviz \
-  inkscape \
-  gnuplot \
   librsvg2-bin \
   # Noto font families with large Unicode coverage
   fonts-noto-cjk \
-  fonts-noto-cjk-extra \
+  # fonts-noto-cjk-extra \
   fonts-noto-mono \
-  # puppeteer dependencies
-  libx11-xcb-dev \
-  libxcomposite-dev \
-  libxcursor-dev \
-  libxdamage-dev \
-  libxtst-dev \
-  libxss-dev \
-  libxrandr-dev \
-  libasound-dev \
-  libatk1.0-dev \
-  libatk-bridge2.0-dev \
-  libpango1.0-dev \
-  libgtk-3-dev \
-  libnss3 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -57,29 +40,8 @@ RUN dpkg -i pandoc.deb && rm pandoc.deb
 
 # python packages
 RUN python -m pip install \
-  pandoc-plantuml-filter \
-  git+https://github.com/timofurrer/pandoc-mermaid-filter.git \
+  pandoc-latex-environment \
   git+https://gitlab.com/myriacore/pandoc-kroki-filter.git
-
-COPY --from=download-plantuml /tmp/plantuml.jar /home/plantuml.jar
-
-COPY --from=build-env-node /node_modules /usr/local/lib/node_modules
-
-RUN ln -sf /usr/local/lib/node_modules/.bin/mmdc /usr/bin/mermaid
-
-RUN echo '#!/bin/bash\n\
-    /usr/bin/java -jar /home/plantuml.jar $@' > /usr/bin/plantuml
-RUN chmod a+x /usr/bin/plantuml
-
-# puppeteer conf
-RUN mkdir /opt/puppeteer
-RUN echo "{\"args\": [\"--no-sandbox\", \"--disable-setuid-sandbox\"]}" > /opt/puppeteer/puppeteer.json
-ENV PUPPETEER_CFG=/opt/puppeteer/puppeteer.json
-
-# Could not create directory xxx, 但即使设置了也没用
-# ENV PANDOCFILTER_CLEANUP="1"
-
-ENV KROKI_DIAGRAM_BLACKLIST="plantuml,mermaid"
 
 RUN useradd pandoc
 
@@ -89,6 +51,12 @@ RUN mkdir /home/pandoc && chown pandoc /home/pandoc
 
 USER pandoc
 
+# eisvogel template
+
+RUN mkdir -p /home/pandoc/.local/share/pandoc/templates/
+
+COPY --from=download-eisvogel /tmp/eisvogel.latex /home/pandoc/.local/share/pandoc/templates/eisvogel.latex
+
 WORKDIR /var/docs/
 
-ENTRYPOINT ["pandoc", "--filter", "pandoc-plantuml", "--filter", "pandoc-mermaid", "--filter", "pandoc-kroki"]
+ENTRYPOINT ["pandoc", "--filter", "pandoc-kroki", "--filter", "pandoc-latex-environment"]

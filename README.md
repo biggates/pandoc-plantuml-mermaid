@@ -2,11 +2,11 @@
 
 [![GitHub Workflow badge](https://img.shields.io/github/workflow/status/biggates/pandoc-plantuml-mermaid/ci?label=GitHub%20building&logo=github)](https://github.com/biggates/pandoc-plantuml-mermaid) [![docker badge](https://img.shields.io/docker/pulls/biggates/pandoc-plantuml-mermaid?logo=docker)](https://hub.docker.com/r/biggates/pandoc-plantuml-mermaid)
 
-一个带有 plantuml 和 mermaid 支持，并带有 LaTeX 环境的 docker 镜像。
+一个带有 plantuml 和 mermaid 支持 (通过 kroki)，并带有 LaTeX 环境，还搭载了 eisvogel 模板的 docker 镜像。
 
 ## 如何使用
 
-简单来说，这就是一个带上了 `--filter pandoc-plantuml --filter pandoc-mermaid` 参数的 pandoc 。
+简单来说，这就是一个带上了 `--filter pandoc-kroki --filter pandoc-latex-environment` 参数的 pandoc 。
 
 所以可以认为，如下指令
 
@@ -27,7 +27,7 @@ $ docker run --rm -v `pwd`:/var/docs biggates/pandoc-plantuml-mermaid
 | 环境变量                  | 默认值              | 使用者              | 说明                    |
 | ------------------------- | ------------------- | ------------------- | ----------------------- |
 | `KROKI_SERVER`            | `https://kroki.io/` | pandoc-kroki-filter | Kroki 服务器的地址      |
-| `KROKI_DIAGRAM_BLACKLIST` | `mermaid,plantuml`  | pandoc-kroki-filter | 不使用 kroki 绘图的类型 |
+| `KROKI_DIAGRAM_BLACKLIST` | ``                  | pandoc-kroki-filter | 不使用 kroki 绘图的类型 |
 
 ### 已知问题
 
@@ -59,6 +59,7 @@ $ docker run --rm \
   --output example.pdf \
   --toc \
   --include-in-header /var/docs/template.tex \
+  --template eisvogel \
   --pdf-engine=xelatex \
   -VCJKmainfont="Noto Serif CJK SC" \
   example.md
@@ -71,20 +72,14 @@ $ docker run --rm \
 本 image 中的主要组件为:
 
 * 基于 `texlive/texlive`
-* nodejs
-  * mermaid-cli 位于 `/usr/local/lib/node_modules/.bin/mmdc` -> `/usr/bin/mermaid`
 * python3
-  * [pandoc-mermaid-filter](https://github.com/timofurrer/pandoc-mermaid-filter)
-  * [pandoc-plantuml-filter](https://github.com/timofurrer/pandoc-plantuml-filter)
   * [pandoc-kroki-filter](https://gitlab.com/myriacore/pandoc-kroki-filter)
-* plantuml 位于 `/home/plantuml.jar`
-  * graphviz
-  * inkspace
-  * gnuplot
+  * [pandoc-latex-environment](https://github.com/chdemko/pandoc-latex-environment)
 * fonts
   * fonts-noto-cjk
-  * fonts-noto-cjk-extra
   * fonts-noto-mono
+* 模板
+  * [Eisvogel](https://github.com/Wandmalfarbe/pandoc-latex-template)
 
 ### 编译 docker 镜像
 
